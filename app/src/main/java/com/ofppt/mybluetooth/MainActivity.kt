@@ -33,7 +33,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-          var out =   findViewById<View>(R.id.out);
+        var out =   findViewById<View>(R.id.out);
         var button1 =  findViewById<View>(R.id.button1);
         var button2 =   findViewById<View>(R.id.button2);
         var button3 =  findViewById<View>(R.id.button3);
@@ -45,31 +45,104 @@ class MainActivity : AppCompatActivity() {
 
         button1.setOnClickListener(View.OnClickListener() {
             if (!mBluetoothAdapter.isEnabled()) {
-                val enableBtIntent =  Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+
+                Dexter.withContext(this@MainActivity).withPermission(   Manifest.permission.BLUETOOTH_CONNECT)
+                    .withListener(
+                        object: PermissionListener {
+                            @SuppressLint("MissingPermission")
+                            override fun onPermissionGranted(p0: PermissionGrantedResponse?) {
+                                val enableBtIntent =  Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+
+                            }
+
+                            override fun onPermissionDenied(p0: PermissionDeniedResponse?) {
+
+                                if(p0?.isPermanentlyDenied == true)
+                                    Log.d("MainActivity","Permission denied")
+                            }
+
+                            override fun onPermissionRationaleShouldBeShown(
+                                p0: PermissionRequest?,
+                                p1: PermissionToken?
+                            ) {
+                                p1?.continuePermissionRequest()
+                            }
+
+                        }
+                    ).check()
+
+
 
             }
         });
         button2.setOnClickListener(View.OnClickListener() {
 
 
-            if (!mBluetoothAdapter.isDiscovering()) {
-                //out.append("MAKING YOUR DEVICE DISCOVERABLE");
-                Toast.makeText(
-                    getApplicationContext(), "MAKING YOUR DEVICE DISCOVERABLE",
-                    Toast.LENGTH_LONG
-                );
+            Dexter.withContext(this@MainActivity).withPermission(   Manifest.permission.BLUETOOTH_SCAN)
+                .withListener(
+                    object: PermissionListener {
+                        @SuppressLint("MissingPermission")
+                        override fun onPermissionGranted(p0: PermissionGrantedResponse?) {
+                            if (!mBluetoothAdapter.isDiscovering()) {
+                                //out.append("MAKING YOUR DEVICE DISCOVERABLE");
+                                Toast.makeText(
+                                    getApplicationContext(), "MAKING YOUR DEVICE DISCOVERABLE",
+                                    Toast.LENGTH_LONG
+                                );
 
-                val enableBtIntent =  Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
-                startActivityForResult(enableBtIntent, REQUEST_DISCOVERABLE_BT);
+                                val enableBtIntent =  Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE);
+                                startActivityForResult(enableBtIntent, REQUEST_DISCOVERABLE_BT);
 
-            }
+                            }
+
+                        }
+
+                        override fun onPermissionDenied(p0: PermissionDeniedResponse?) {
+
+                            if(p0?.isPermanentlyDenied == true)
+                                Log.d("MainActivity","Permission denied")
+                        }
+
+                        override fun onPermissionRationaleShouldBeShown(
+                            p0: PermissionRequest?,
+                            p1: PermissionToken?
+                        ) {
+                            p1?.continuePermissionRequest()
+                        }
+
+                    }
+                ).check()
+
 
         })
         button3.setOnClickListener( View.OnClickListener() {
-            mBluetoothAdapter.disable();
-            //out.append("TURN_OFF BLUETOOTH");
-            Toast.makeText(getApplicationContext(), "TURNING_OFF BLUETOOTH", Toast.LENGTH_LONG);
+            Dexter.withContext(this@MainActivity).withPermission(   Manifest.permission.BLUETOOTH_CONNECT)
+                .withListener(
+                    object: PermissionListener {
+                        @SuppressLint("MissingPermission")
+                        override fun onPermissionGranted(p0: PermissionGrantedResponse?) {
+                            mBluetoothAdapter.disable();
+                            //out.append("TURN_OFF BLUETOOTH");
+                            Toast.makeText(getApplicationContext(), "TURNING_OFF BLUETOOTH", Toast.LENGTH_LONG);
+
+                        }
+
+                        override fun onPermissionDenied(p0: PermissionDeniedResponse?) {
+
+                            if(p0?.isPermanentlyDenied == true)
+                                Log.d("MainActivity","Permission denied")
+                        }
+
+                        override fun onPermissionRationaleShouldBeShown(
+                            p0: PermissionRequest?,
+                            p1: PermissionToken?
+                        ) {
+                            p1?.continuePermissionRequest()
+                        }
+
+                    }
+                ).check()
 
         });
     }
